@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>🎉 Fun API Gateway Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  h1 {
+    font-weight: 700;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+  }
+
+  input {
+    padding: 12px 20px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 30px;
+    margin-right: 15px;
+    width: 250px;
+    max-width: 90vw;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: box-shadow 0.3s ease;
+  }
+
+  input:focus {
+    outline: none;
+    box-shadow: 0 0 12px #ffdd59;
+  }
+
+  button {
+    padding: 12px 25px;
+    font-size: 1.2rem;
+    background: #ffdd59;
+    color: #222;
+    font-weight: 700;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255,221,89,0.6);
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+
+  button:hover {
+    background: #ffc107;
+    transform: scale(1.1);
+  }
+
+  #response {
+    margin-top: 30px;
+    font-size: 2rem;
+    font-weight: 700;
+    min-height: 60px;
+    animation: fadeInUp 0.5s ease forwards;
+  }
+
+  /* Animate response text */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Confetti container */
+  #confetti-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    overflow: visible;
+  }
+</style>
+</head>
+<body>
+
+  <h1>👋 Hello from AWS Lambda + API Gateway</h1>
+  <div>
+    <input type="text" id="nameInput" placeholder="Enter your name" />
+    <button onclick="callAPI()">Greet Me</button>
+  </div>
+
+  <div id="response"></div>
+  <div id="confetti-container"></div>
+
+  <script>
+    // Confetti animation
+    function createConfetti() {
+      const container = document.getElementById('confetti-container');
+      const colors = ['#ffdd59', '#ff6b6b', '#48dbfb', '#1dd1a1', '#f368e0'];
+      for(let i=0; i<100; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.position = 'absolute';
+        confetti.style.width = '8px';
+        confetti.style.height = '8px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+        confetti.style.left = Math.random()*window.innerWidth + 'px';
+        confetti.style.top = '-10px';
+        confetti.style.opacity = Math.random();
+        confetti.style.transform = `rotate(${Math.random()*360}deg)`;
+        confetti.style.borderRadius = '3px';
+        confetti.style.animation = `fall ${2 + Math.random()*3}s linear forwards`;
+        confetti.style.zIndex = '9999';
+        container.appendChild(confetti);
+
+        // Remove confetti after animation
+        confetti.addEventListener('animationend', () => container.removeChild(confetti));
+      }
+    }
+
+    // Confetti fall animation
+    const styleSheet = document.createElement('style');
+    styleSheet.type = 'text/css';
+    styleSheet.innerText = `
+      @keyframes fall {
+        to {
+          transform: translateY(110vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(styleSheet);
+
+    async function callAPI() {
+      const name = document.getElementById("nameInput").value.trim();
+      if(!name) {
+        document.getElementById("response").innerText = "Please enter your name!";
+        return;
+      }
+      const url = `https://m970s3hyx9.execute-api.us-east-1.amazonaws.com/Prod/greet?name=${encodeURIComponent(name)}`;
+
+      document.getElementById("response").innerText = "Loading...";
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        document.getElementById("response").innerText = data.message;
+
+        // Show confetti on success
+        createConfetti();
+      } catch (err) {
+        document.getElementById("response").innerText = "Error: " + err.message;
+      }
+    }
+  </script>
+
+</body>
+</html>
